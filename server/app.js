@@ -2,12 +2,16 @@ const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
 
+const userRouter = require("./routes/userRoutes");
+
 const app = express();
 
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10kb" }));
 
 //routes
+
+app.use("/api/users", userRouter);
 
 app.use("/", (req, res, next) => {
   res.status(200).json({ message: "sup" });

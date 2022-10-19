@@ -1,5 +1,5 @@
 const Sequelize = require("sequelize");
-const { set } = require("../../app");
+const bcrypt = require("bcrypt");
 const db = require("../db");
 
 const User = db.define("user", {
@@ -28,7 +28,11 @@ const User = db.define("user", {
   username: {
     type: Sequelize.VIRTUAL,
     get() {
-      return `${this.firstName} ${this.lastName}`;
+      return `${this.firstName[0].toUpperCase()}${this.firstName
+        .slice(1)
+        .toLowerCase()} ${this.lastName[0].toUpperCase()}${this.lastName
+        .slice(1)
+        .toLowerCase()}`;
     },
     set(val) {
       throw new Error("Do not try to set the username property!");
@@ -57,4 +61,30 @@ const User = db.define("user", {
   },
 });
 
-User.beforeCreate = async (user) => {};
+const hashPassword = async (user) => {
+  if (user.changed("password")) {
+    user.password = await bcrypt.hash(user.password, 5);
+  }
+};
+
+User.prototype.checkPassword = (candidatePass) => {
+  return bcrypt.compare(candidatePass, this.password);
+};
+
+User.beforeCreate(async (user) => {
+  user.passwordConfirm = undefined;
+  await hashPassword(user);
+});
+
+User.beforeUpdate(hashPassword);
+
+User.beforeBulkCreate((users) =>
+  Promise.all(
+    users.map((user) => {
+      user.passwordConfirm = undefined;
+      hashPassword(user);
+    })
+  )
+);
+
+module.exports = User;
