@@ -1,6 +1,7 @@
 const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 const userRouter = require("./routes/userRoutes");
 
@@ -8,6 +9,7 @@ const app = express();
 
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10kb" }));
+app.use(cookieParser());
 
 //routes
 

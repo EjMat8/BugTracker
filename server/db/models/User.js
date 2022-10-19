@@ -63,7 +63,7 @@ const User = db.define("user", {
 
 const hashPassword = async (user) => {
   if (user.changed("password")) {
-    user.password = await bcrypt.hash(user.password, 5);
+    user.password = await bcrypt.hash(user.password, 12);
   }
 };
 
